@@ -1,34 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import React, { useState } from "react";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+interface ClickedProps {
+  clientX: number;
+  clientY: number;
 }
 
-export default App
+function App() {
+  const [clickedPoints, setClickedPoints] = useState<ClickedProps[]>([]);
+  const [undoPoints, setUndoPoints] = useState<ClickedProps[]>([]);
+
+
+  function getCord(e: React.MouseEvent<HTMLElement>) {
+    const { clientX, clientY } = e;
+
+    setClickedPoints([...clickedPoints, { clientX, clientY }]);
+  }
+  function handleUndo() {
+    const newClickedPoint = [...clickedPoints]
+    const undoPoint = newClickedPoint.pop()
+    setClickedPoints(newClickedPoint)
+    if (!undoPoint) return
+    setUndoPoints([...undoPoints, undoPoint])
+  }
+
+  function handleRedo(){
+    const newUndoPoints = [...undoPoints]
+    const redoPoint = newUndoPoints.pop()
+    if (!redoPoint) return
+    setUndoPoints(newUndoPoints)
+    setClickedPoints([...clickedPoints, redoPoint])
+  }
+
+  return (
+    <>
+      <button disabled={clickedPoints.length === 0} onClick={handleUndo}>Undo</button>
+      <button disabled={undoPoints.length === 0}  onClick={handleRedo}>Redo</button>
+      <div className="App" onClick={getCord}>
+        {clickedPoints.map((clickedPoint, index) => {
+          return (
+            <div
+              key={index}
+              style={{
+                left: clickedPoint.clientX - 6,
+                top: clickedPoint.clientY - 6,
+                position: "absolute",
+              }}
+            >
+              🏈🏀⚽
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+export default App;
